@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@dynamic-labs/ethereum": "^0.19.0",
-    "@dynamic-labs/sdk-react-core": "^0.19.0",
-    "@dynamic-labs/wagmi-connector": "^0.19.0",
+    "@dynamic-labs/ethereum": "^1.0.0",
+    "@dynamic-labs/ethereum-aa": "^1.0.0",
+    "@dynamic-labs/wagmi-connector": "^1.0.0",
     "@types/node": "20.8.7",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
