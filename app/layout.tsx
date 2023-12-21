@@ -1,18 +1,7 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import {
-    AlgorandWalletConnectors,
-    BloctoEvmWalletConnectors,
-    CosmosWalletConnectors,
-    DynamicContextProvider,
-    DynamicWagmiConnector,
-    EthereumWalletConnectors,
-    FlowWalletConnectors,
-    MagicWalletConnectors,
-    SolanaWalletConnectors,
-    StarknetWalletConnectors,
-} from "../lib/dynamic"
+import { DynamicContextProvider, DynamicWagmiConnector, EthereumWalletConnectors } from "../lib/dynamic"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -33,13 +22,6 @@ export default function RootLayout({
                 environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENV_ID!,
                 walletConnectors: [
                     EthereumWalletConnectors,
-                    FlowWalletConnectors,
-                    CosmosWalletConnectors,
-                    BloctoEvmWalletConnectors,
-                    AlgorandWalletConnectors,
-                    StarknetWalletConnectors,
-                    MagicWalletConnectors,
-                    SolanaWalletConnectors,
                 ],
             }}
         >
