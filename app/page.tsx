@@ -219,6 +219,49 @@ const GenerateSessionKey = () => {
     )
 }
 
+const SignMessage = () => {
+    const [unsignedMessage, setUnsignedMessage] = useState<string>()
+    const [sig, setSig] = useState<string>()
+
+    const { primaryWallet } = useDynamicContext()
+    if (!primaryWallet) {
+        return <div>No primary wallet</div>
+    }
+    const { connector } = primaryWallet
+    if (!isZeroDevConnector(connector)) {
+        return <div>Not a ZeroDevConnector</div>
+    }
+    const ecdsaProvider = connector.getAccountAbstractionProvider()
+    if (!ecdsaProvider) {
+        return <div>No ECDSA provider</div>
+    }
+
+    const signMessage = async () => {
+        const start = Date.now()
+
+        const signature = await ecdsaProvider.signMessageWith6492(unsignedMessage || "")
+        setSig(signature)
+
+        console.log(`signMessage: ${Date.now() - start}ms`)
+    }
+
+    return (
+        <div className="p-6 max-w-5xl w-full items-center justify-between font-mono text-sm">
+            <p className="border-2 p-2">
+                Message: <input className="w-full font-mono text-sm bg-gray-700" value={unsignedMessage}
+                                onChange={(e) => setUnsignedMessage(e.target.value)} />
+            </p>
+            <p className="border-2 p-2">
+                Signature: <input className="w-full font-mono text-sm bg-gray-700" value={sig}
+                                onChange={(e) => setSig(e.target.value)} />
+            </p>
+            <button className="border-2 p-2" onClick={signMessage}>
+                Sign Message
+            </button>
+        </div>
+    )
+}
+
 export default function Home() {
     return (
         <main className="flex flex-col items-center justify-between p-24">
@@ -230,6 +273,7 @@ export default function Home() {
             <TokenBalance />
             <SendToken />
             <GenerateSessionKey />
+            <SignMessage />
         </main>
     )
 }
