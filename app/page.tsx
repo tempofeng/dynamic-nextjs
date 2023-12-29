@@ -18,10 +18,10 @@ import { isZeroDevConnector } from "@dynamic-labs/ethereum-aa"
 import { encodeFunctionData, zeroAddress } from "viem"
 import { useState } from "react"
 
-const testUsdcAddress = "0xe5e0DE0ABfEc2FFFaC167121E51d7D8f57C8D9bC"
-const myZeroDevWalletAddress = "0x15C3E27F9967b5244E1DCB16a0ad9d9036aaA568"
+const testUsdcAddress = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607"
+const myZeroDevWalletAddress = "0xfD7D4BFa21276acf6ceA29E041AbD8E1a887A6ae"
 const toWalletAddress = "0xC13B7CDa9B08A4Fb1026E479A2079029cd30BfaD"
-const usdcTransferAmount = 150_000000n
+const usdcTransferAmount = 1_000000n
 const usdcTransferCap = 100_000000n
 
 
