@@ -8,6 +8,7 @@ import {
     useContractWrite,
     useNetwork,
     usePrepareContractWrite,
+    usePublicClient,
     useToken,
 } from "wagmi"
 import { ERC20Abi, getPermissionFromABI, ParamOperator, SessionKeyProvider } from "@zerodev/sdk"
@@ -222,6 +223,8 @@ const GenerateSessionKey = () => {
 const SignMessage = () => {
     const [unsignedMessage, setUnsignedMessage] = useState<string>()
     const [sig, setSig] = useState<string>()
+    const [valid, setValid] = useState<boolean>(false)
+    const publicClient = usePublicClient()
 
     const { primaryWallet } = useDynamicContext()
     if (!primaryWallet) {
@@ -237,12 +240,22 @@ const SignMessage = () => {
     }
 
     const signMessage = async () => {
-        const start = Date.now()
+        let start = Date.now()
 
         const signature = await ecdsaProvider.signMessageWith6492(unsignedMessage || "")
         setSig(signature)
 
         console.log(`signMessage: ${Date.now() - start}ms`)
+        start = Date.now()
+
+        const valid = await publicClient.verifyMessage({
+            address: primaryWallet.address as Address,
+            message: unsignedMessage || "",
+            signature,
+        })
+        setValid(valid)
+
+        console.log(`verifyMessage: ${Date.now() - start}ms`)
     }
 
     return (
@@ -254,6 +267,9 @@ const SignMessage = () => {
             <p className="border-2 p-2">
                 Signature: <input className="w-full font-mono text-sm bg-gray-700" value={sig}
                                 onChange={(e) => setSig(e.target.value)} />
+            </p>
+            <p className="border-2 p-2">
+                Valid: {valid ? "true" : "false"}
             </p>
             <button className="border-2 p-2" onClick={signMessage}>
                 Sign Message
