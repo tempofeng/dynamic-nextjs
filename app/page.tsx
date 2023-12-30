@@ -8,6 +8,7 @@ import {
     useContractWrite,
     useNetwork,
     usePrepareContractWrite,
+    usePublicClient,
     useToken,
 } from "wagmi"
 import { ERC20Abi, getPermissionFromABI, ParamOperator, SessionKeyProvider } from "@zerodev/sdk"
@@ -18,10 +19,10 @@ import { isZeroDevConnector } from "@dynamic-labs/ethereum-aa"
 import { encodeFunctionData, zeroAddress } from "viem"
 import { useState } from "react"
 
-const testUsdcAddress = "0xe5e0DE0ABfEc2FFFaC167121E51d7D8f57C8D9bC"
-const myZeroDevWalletAddress = "0x15C3E27F9967b5244E1DCB16a0ad9d9036aaA568"
+const testUsdcAddress = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607"
+const myZeroDevWalletAddress = "0xfD7D4BFa21276acf6ceA29E041AbD8E1a887A6ae"
 const toWalletAddress = "0xC13B7CDa9B08A4Fb1026E479A2079029cd30BfaD"
-const usdcTransferAmount = 150_000000n
+const usdcTransferAmount = 1_000000n
 const usdcTransferCap = 100_000000n
 
 
@@ -219,6 +220,64 @@ const GenerateSessionKey = () => {
     )
 }
 
+const SignMessage = () => {
+    const [unsignedMessage, setUnsignedMessage] = useState<string>()
+    const [sig, setSig] = useState<string>()
+    const [valid, setValid] = useState<boolean>(false)
+    const publicClient = usePublicClient()
+
+    const { primaryWallet } = useDynamicContext()
+    if (!primaryWallet) {
+        return <div>No primary wallet</div>
+    }
+    const { connector } = primaryWallet
+    if (!isZeroDevConnector(connector)) {
+        return <div>Not a ZeroDevConnector</div>
+    }
+    const ecdsaProvider = connector.getAccountAbstractionProvider()
+    if (!ecdsaProvider) {
+        return <div>No ECDSA provider</div>
+    }
+
+    const signMessage = async () => {
+        let start = Date.now()
+
+        const signature = await ecdsaProvider.signMessageWith6492(unsignedMessage || "")
+        setSig(signature)
+
+        console.log(`signMessage: ${Date.now() - start}ms`)
+        start = Date.now()
+
+        const valid = await publicClient.verifyMessage({
+            address: primaryWallet.address as Address,
+            message: unsignedMessage || "",
+            signature,
+        })
+        setValid(valid)
+
+        console.log(`verifyMessage: ${Date.now() - start}ms`)
+    }
+
+    return (
+        <div className="p-6 max-w-5xl w-full items-center justify-between font-mono text-sm">
+            <p className="border-2 p-2">
+                Message: <input className="w-full font-mono text-sm bg-gray-700" value={unsignedMessage}
+                                onChange={(e) => setUnsignedMessage(e.target.value)} />
+            </p>
+            <p className="border-2 p-2">
+                Signature: <input className="w-full font-mono text-sm bg-gray-700" value={sig}
+                                onChange={(e) => setSig(e.target.value)} />
+            </p>
+            <p className="border-2 p-2">
+                Valid: {valid ? "true" : "false"}
+            </p>
+            <button className="border-2 p-2" onClick={signMessage}>
+                Sign Message
+            </button>
+        </div>
+    )
+}
+
 export default function Home() {
     return (
         <main className="flex flex-col items-center justify-between p-24">
@@ -230,6 +289,7 @@ export default function Home() {
             <TokenBalance />
             <SendToken />
             <GenerateSessionKey />
+            <SignMessage />
         </main>
     )
 }
