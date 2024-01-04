@@ -19,8 +19,7 @@ import { isZeroDevConnector } from "@dynamic-labs/ethereum-aa"
 import { encodeFunctionData, zeroAddress } from "viem"
 import { useState } from "react"
 
-const testUsdcAddress = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607"
-const myZeroDevWalletAddress = "0xfD7D4BFa21276acf6ceA29E041AbD8E1a887A6ae"
+const usdcAddress = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607"
 const toWalletAddress = "0xC13B7CDa9B08A4Fb1026E479A2079029cd30BfaD"
 const usdcTransferAmount = 1_000000n
 const usdcTransferCap = 100_000000n
@@ -43,7 +42,7 @@ const WalletInfo = () => {
 
 const TokenInfo = () => {
     const { data, isError, isLoading } = useToken({
-        address: testUsdcAddress,
+        address: usdcAddress,
     })
 
     if (isLoading) return <div>Fetching token…</div>
@@ -61,12 +60,15 @@ const TokenInfo = () => {
 }
 
 const TokenBalance = () => {
+    const { address } = useAccount()
+
     const { data, isError, isLoading } = useBalance({
-        address: myZeroDevWalletAddress,
-        token: testUsdcAddress,
+        address,
+        token: usdcAddress,
         watch: true,
     })
 
+    if (!address) return <div>No address</div>
     if (isLoading) return <div>Fetching balance…</div>
     if (isError) return <div>Error fetching balance</div>
     return (
@@ -78,17 +80,17 @@ const TokenBalance = () => {
 
 const SendToken = () => {
     const { config } = usePrepareContractWrite({
-        address: testUsdcAddress,
+        address: usdcAddress,
         abi: ERC20Abi,
         functionName: "transfer",
         args: [toWalletAddress, usdcTransferAmount],
     })
     const { write } = useContractWrite(config)
-
+    const usdcAmount = (usdcTransferAmount / 1000000n).toString()
     return (
         <div className="p-6 max-w-5xl w-full items-center justify-between font-mono text-sm">
             <button className="border-2 p-2" disabled={!write} onClick={() => write?.()}>
-                Send USDC
+                Send {usdcAmount} USDC to {toWalletAddress}
             </button>
         </div>
     )
@@ -132,7 +134,7 @@ const GenerateSessionKey = () => {
                 permissions: [
                     getPermissionFromABI({
                         // Target contract to interact with
-                        target: testUsdcAddress,
+                        target: usdcAddress,
                         // Maximum value that can be transferred.  In this case we
                         // set it to zero so that no value transfer is possible.
                         valueLimit: 0n,
@@ -185,7 +187,7 @@ const GenerateSessionKey = () => {
         console.log(`deserialize: ${Date.now() - start}ms`)
 
         const { hash } = await sessionKeyProvider.sendUserOperation({
-            target: testUsdcAddress,
+            target: usdcAddress,
             data: encodeFunctionData({
                 abi: ERC20Abi,
                 functionName: "transfer",
@@ -266,7 +268,7 @@ const SignMessage = () => {
             </p>
             <p className="border-2 p-2">
                 Signature: <input className="w-full font-mono text-sm bg-gray-700" value={sig}
-                                onChange={(e) => setSig(e.target.value)} />
+                                  onChange={(e) => setSig(e.target.value)} />
             </p>
             <p className="border-2 p-2">
                 Valid: {valid ? "true" : "false"}
